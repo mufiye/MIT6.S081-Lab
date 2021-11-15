@@ -95,3 +95,19 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+//lab2新添加
+uint64
+sys_trace(void)
+{
+  int n;
+  argint(0,&n);
+  return n;
+}
+
+//lab2新添加
+uint64
+sys_sysinfo(void)
+{
+  return 12345;
+}
