@@ -440,3 +440,43 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     return -1;
   }
 }
+
+// Lab3 Q1: 关于打印的item: Each PTE line shows the PTE index in its page-table page, the pte bits, and the physical address extracted from the PTE.
+// Lab3 Q2: vmprint may come in handy to debug page tables.
+void vmprint(pagetable_t pagetable)
+{
+  printf("page table %p\n", pagetable);
+  for (int i = 0; i < 512; i++)
+  {
+    pte_t pte = pagetable[i];
+    if ((pte & PTE_V) && (pte & (PTE_R | PTE_W | PTE_X)) == 0)
+    {
+      pagetable_t child = (pagetable_t)PTE2PA(pte);
+      printf("..%d: pte %p pa %p\n", i, pte, child);
+      // this PTE points to a lower-level page table.
+      for (int j = 0; j < 512; j++)
+      {
+        pte_t pte2 = child[j];
+        if ((pte2 & PTE_V) && (pte2 & (PTE_R | PTE_W | PTE_X)) == 0)
+        {
+          pagetable_t childchild = (pagetable_t)PTE2PA(pte2);
+          printf(".. ..%d: pte %p pa %p\n", j, pte2, childchild);
+          for (int k = 0; k < 512; k++)
+          {
+            pte_t pte3 = childchild[k];
+            if ((pte3 & PTE_V) && (pte3 & (PTE_R | PTE_W | PTE_X)) != 0)
+            {
+              printf(".. .. ..%d: pte %p pa %p\n", k, pte3, PTE2PA(pte3));
+            }
+          }
+        }
+        // freewalk((pagetable_t)child);
+        // pagetable[i] = 0;
+      }
+      // else if(pte & PTE_V){
+      //   panic("freewalk: leaf");
+      // }
+    }
+  }
+  return;
+}
